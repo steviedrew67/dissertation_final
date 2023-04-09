@@ -1,0 +1,110 @@
+---
+title: "Cohere - Tales of the Call Center Subreddit Report"
+output:
+  pdf_document:
+    toc: no
+  html_document:
+    toc: no
+    df_print: paged
+header-includes:
+- \usepackage{titlesec}
+- \usepackage{booktabs}
+- \titleformat{\section}[hang]{\normalfont\Large\bfseries}{Topic Number \thesection:}{1em}{}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(xtable)
+library(knitr)
+library(stringr)
+library(grid)
+library(ggplot2)
+library(gridExtra)
+
+```
+
+```{r import, include=FALSE}
+# Load the CSV files
+data <- read_csv("tfcc_top_20_summaries_of_summaries_cohere.csv")
+comments_data <- read_csv("tfcc_comments_summaries_of_summaries_cohere.csv")
+summary_data <- read_csv("tfcc_summary_details_cohere.csv")
+subreddit_data <- read_csv("subreddit_overview.csv")
+
+# Split data into separate DataFrames for each topic
+topics <- split(data, data$topic)
+comments <- split(comments_data, comments_data$topic)
+
+# Extract subreddit variables
+scope <- subreddit_data$scope
+subreddit_description <- subreddit_data$subreddit_description
+subreddit_name <- subreddit_data$subreddit_name
+description_intro <- subreddit_data$description_intro
+
+```
+
+
+```{r report, results='asis'}
+
+# Function to create a report for each topic
+
+escape_markdown <- function(text) {
+  text <- gsub("[_*\\]\\[]", "\\\\\\0", text)
+  gsub("\\#", "\\\\#", text)
+}
+
+# Function to create a report for each topic
+print_topic_report <- function(topic_data, comment_data, summary_data, intro_summary) {
+  cat(paste0("\n\n## Topic Number ", topic_data$topic[1] + 1, ": ", escape_markdown(topic_data$topic_name[1]), "\n\n"))
+
+  # Print the "Topic Introduction" section
+  cat("### Topic Introduction\n\n")
+  cat(escape_markdown(intro_summary), "\n\n")
+  
+  # Print all themes for this topic in a table
+  cat("### Themes\n\n")
+  themes_table <- knitr::kable(suppressWarnings(matrix(topic_data$theme, ncol = 3, byrow = TRUE)), col.names = NULL, align = "c", caption = NULL, booktabs = TRUE)
+  cat(paste0(capture.output(themes_table), collapse = "\n"))
+
+  cat("\n\n")
+
+  # Print the "Overview of Sentiment" table
+  cat("### Sentiment\n\n")
+  sentiment_table <- knitr::kable(
+    summary_data[, c("avg_pos_sentiment", "avg_neg_sentiment", "avg_comments_pos_sentiment", "avg_comments_neg_sentiment")],
+    col.names = c("Positive Sentiment", "Negative Sentiment", "Comments Positive Sentiment", "Comments Negative Sentiment"),
+    align = "c", caption = NULL, booktabs = TRUE
+  )
+  cat(paste0(capture.output(sentiment_table), collapse = "\n"))
+  cat("\n\n")
+
+  # Print the "Summaries of Submissions" section
+  cat("### Summaries of Submissions\n\n")
+  cat(paste0("- **", escape_markdown(topic_data$theme), ".** ", escape_markdown(topic_data$new_summary), "\n\n"), sep = "", collapse = "")
+
+  cat("\n\n")
+  # Print summary of comments
+  cat("### Summary of comments\n\n")
+  for (j in 1:nrow(comment_data)) {
+    cat(paste0("", escape_markdown(comment_data$new_summary[j]), "\n"))
+  }
+  cat("\n")
+}
+
+
+# Add the Disclaimer & Introduction sections
+cat(paste0("# Disclaimer\n\n", escape_markdown(description_intro), "\n\n"))
+cat(paste0("# Introduction\n\n", escape_markdown(subreddit_description), "\n\n", scope, "\n\n"))
+
+# Insert intro_summary before each topic level report
+for (i in 1:length(topics)) {
+  topic_data <- topics[[i]]
+  comment_data <- comments[[i]]
+  current_summary_data <- summary_data[summary_data$Topic == topic_data$topic[1],]
+  current_intro_summary <- summary_data$intro_summary[i]
+  print_topic_report(topic_data, comment_data, current_summary_data, current_intro_summary)
+}
+
+
+
+```
