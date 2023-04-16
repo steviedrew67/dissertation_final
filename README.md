@@ -16,3 +16,5 @@ https://github.com/steviedrew67/dissertation_final/blob/main/other/opiates.pdf
 and
 
 https://github.com/steviedrew67/dissertation_final/blob/main/other/running.pdf
+
+Feel free to contact me with any questions or issues:  sdrew4@depaul.edu
