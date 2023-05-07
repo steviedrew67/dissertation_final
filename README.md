@@ -1,6 +1,6 @@
 The notebooks and rmarkdown files in this repository were used to generate the following report: https://github.com/steviedrew67/dissertation_final/blob/main/rmarkdown/openai_summarization_report.pdf.
 
-This code is associated with my doctoral dissertation for DePaul University.  The dissertation is pending defense and will be uploaded here upon successful defense.  
+This code is associated with my doctoral dissertation for DePaul University.  The dissertation is pending defense.  
 
 The draft limitations section is included here: 
 https://github.com/steviedrew67/dissertation_final/blob/main/other/limitations.pdf
